@@ -18,12 +18,12 @@ public class TaskService {
             System.out.println("описание задачи: ");
             String description = Task.checkMessage(scanner.nextLine());
             System.out.println("Тип задачи: 0-рабочая 1- личная ");
-            Task.TaskType taskType = Task.TaskType.values()[scanner.nextInt()];
+            Type type = Type.values()[scanner.nextInt()];
             System.out.println("Повторяемость задачи: 0 - Однократная, 1 - Ежедневная, 2 - Ежемесячная, 4 - Ежегодная");
             int occurrence = scanner.nextInt();
             System.out.println("ВВедите дату: dd.MM.yyyy HH:mm");
             scanner.nextLine();
-            createEvent(scanner, title, description, taskType, occurrence);
+            createEvent(scanner, title, description, type, occurrence);
             System.out.println("Для выхода нажмите Enter");
             scanner.nextLine();
         } catch (IncorrectArgumentException e) {
@@ -31,15 +31,15 @@ public class TaskService {
         }
     }
 
-    public static void createEvent(Scanner scanner, String title, String description, Task.TaskType taskType, int occurrence) throws IncorrectArgumentException {
+    public static void createEvent(Scanner scanner, String title, String description, Type type, int occurrence) throws IncorrectArgumentException {
         try {
             LocalDateTime eventDate = LocalDateTime.parse(scanner.nextLine(), DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
             Task task;
-            task = createTask(occurrence, title, description, taskType, eventDate);
+            task = createTask(occurrence, title, description, type, eventDate);
             System.out.println("создана задача " + task);
         } catch (DateTimeParseException e) {
             System.out.println("Некорректнаый формат даты, введите заново ");
-            createEvent(scanner, title, description, taskType, occurrence);
+            createEvent(scanner, title, description, type, occurrence);
         }
     }
 
@@ -73,20 +73,21 @@ public class TaskService {
                     System.out.println("Тип задачи: ");
                     int type = scanner.nextInt();
                     Task task = actualTask.get(id);
-                    task.setTaskType(Task.TaskType);
+                    task.setType(Type.values()[type]);
                 }
                 case 3 -> {
                     scanner.nextLine();
-                    System.out.println("Дата: ");
+                    System.out.println("Введмте новую дату в формате dd.MM.yyyy HH:mm: ");
                     String firstDate = scanner.nextLine();
                     Task task = actualTask.get(id);
-                    task.setFirstDate(LocalDateTime.parse(firstDate));
+                    LocalDateTime newDateTime = LocalDateTime.parse(firstDate, DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
+                    task.setFirstDate(newDateTime);
                 }
             }
-        } catch (
-                TaskNotFoundExseption e) {
+        } catch (TaskNotFoundExseption e) {
             System.out.println(e.getMessage());
         }
+
     }
 
     public static void deleteTask(Scanner scanner) {
@@ -130,30 +131,30 @@ public class TaskService {
         return tasks;
     }
 
-    public static Task createTask(int occurrence, String title, String description, Task.TaskType taskType, LocalDateTime localDateTime) throws IncorrectArgumentException {
+    public static Task createTask(int occurrence, String title, String description, Type type, LocalDateTime localDateTime) throws IncorrectArgumentException {
         return switch (occurrence) {
             case 0 -> {
-                OncelyTask oncelyTask = new OncelyTask(title, description, taskType, localDateTime);
+                OncelyTask oncelyTask = new OncelyTask(title, description, type, localDateTime);
                 actualTask.put(oncelyTask.getId(), oncelyTask);
                 yield oncelyTask;
             }
             case 1 -> {
-                DailyTask task = new DailyTask(title, description, taskType, localDateTime);
+                DailyTask task = new DailyTask(title, description, type, localDateTime);
                 actualTask.put(task.getId(), task);
                 yield task;
             }
             case 2 -> {
-                WeeklyTask task = new WeeklyTask(title, description, taskType, localDateTime);
+                WeeklyTask task = new WeeklyTask(title, description, type, localDateTime);
                 actualTask.put(task.getId(), task);
                 yield task;
             }
             case 3 -> {
-                MonthlyTask task = new MonthlyTask(title, description, taskType, localDateTime);
+                MonthlyTask task = new MonthlyTask(title, description, type, localDateTime);
                 actualTask.put(task.getId(), task);
                 yield task;
             }
             case 4 -> {
-                YearlyTask task = new YearlyTask(title, description, taskType, localDateTime);
+                YearlyTask task = new YearlyTask(title, description, type, localDateTime);
                 actualTask.put(task.getId(), task);
                 yield task;
             }
